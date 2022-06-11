@@ -18,10 +18,16 @@ function prompt() {
         ]
     })
 }
-prompt();
-// view all departments
-//view all roles
-// view all employees
-// add a department
-// add a role
-// update an employee role
+//prompt();
+
+// function to view all departments
+
+// function to view all roles
+
+// function to view all employees
+
+// function to add a department
+
+// function to add a role
+
+// function to update an employee role
