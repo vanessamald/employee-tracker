@@ -16,6 +16,7 @@ function prompt() {
             "View all employees", 
             "Add a department",
             "Add a role",
+            "Add an employee",
             "Update an employee role",
             "EXIT"
         ]
@@ -43,8 +44,13 @@ function prompt() {
     if ( userPrompt == 'Add a role') {
         addRole();
     }
-    })
-};
+    if ( userPrompt == 'Add an employee') {
+        addEmployee();
+    }
+    if ( userPrompt == 'Update an employee role') {
+        updateEmployee();
+    }   
+})};
 
 // function to view all departments  
 const viewAllDepartments = () => {
@@ -113,10 +119,9 @@ const addDepartment = () => {
     })    
 };
 
-// function to add a role **********
-// title, salary, department
+// function to add a role (title, salary, department)
 const addRole = () => {
-    //const departmentsArray = [];
+    
     inquirer.prompt([
         {
             name: 'addNewRole',
@@ -138,10 +143,7 @@ const addRole = () => {
         connection.query(sql, (err, rows) => {
         
         const departments = rows.map(({department_name, id}) => ({name: department_name, value:id}));
-        //const dept = 
-        //const deptId = departments.value;
-        //console.log(departments);
-       
+      
         inquirer.prompt ([
         {
             name: 'departmentName',
@@ -151,42 +153,139 @@ const addRole = () => {
             //validate:    
         }   
     ])
-    
-
-
     .then((answer) => {
+        // destructure object
         const { departmentName } = answer;
         const deptId = departmentName;
         console.log(departmentName);
-        //const departmentName = answer.departmentName;
-        //const selectingDept = `SELECT department_name FROM departments WHERE (?)`
-        // add the dept id HERE
-        //connection.query(selectingDept, answer.departmentName, (err, rows) => {
-        //console.log(rows); 
-        
+
+        // array of parameters
         const roleData = [addNewRole, roleSalary, deptId];
-    
+        
+        // connect to db and add new role
         const insertRole = `INSERT INTO roles(title, salary, department_id) VALUES (?, ?, ?)`;
         connection.query(insertRole, roleData, (rows) => {
+            // let user know new role has been added 
             console.log('New role has been added!');
-            console.log(addNewRole, roleSalary, deptId);
-        //return insertRole;
-        //viewAllRoles();
-
-        const newRoles = `SELECT * FROM roles`;
+            //console.log(addNewRole, roleSalary, deptId);
+            
+            // print new roles table
+            const newRoles = `SELECT * FROM roles`;
             connection.query(newRoles, (err, rows) => {
             console.table(rows);
-        })
-        }
-        )})
-        
-    
+                })}
+            )})
         })   
     })    
 };
+// function to add an employee ********
+// (first_name, last_name, role_id, manager_id)
+const addEmployee = () => {
+    inquirer.prompt ([
+        {
+            name: 'firstName',
+            type: 'input',
+            message: 'What is the first name of the new employee?'
+            //validate: 
+        },
+        {
+            name: 'lastName',
+            type: 'input',
+            message: 'What is the last name of the new employee?'
+            //validate:
+        }
+    ])
+    .then((answer) => {
+        const firstName = answer.firstName;
+        const lastName = answer.lastName;
+        
+
+        const sql = `SELECT * FROM roles`;
+        connection.query(sql, (err, rows) => {
+            const roles = rows.map(({title, id}) => ({name: title, value: id}));
+            inquirer.prompt([
+                {
+                    name:'role',
+                    type: 'list',
+                    message: 'What is the role of the new employee?',
+                    choices: roles
+                }
+            ])
+            .then((answer) => {
+                const roleId = answer.role;
+               
+
+                const sql = `SELECT * FROM employees`;
+               
+                connection.query(sql, (err, rows) => {
+                const managers = rows.map(({first_name, last_name, id}) => ({name: `${first_name} ${last_name}`, value: id}));
+                //const managerList = managers.name;
+                    inquirer.prompt([
+                        {
+                            name: 'manager',
+                            type: 'list',
+                            message: "Who is the new employee's manager?",
+                            choices: managers
+                        }
+                    ])
+                    .then((answer) => {
+                        const { manager } = answer;
+                        const newEmployee = [firstName, lastName, roleId, manager];
+                        console.log(newEmployee);
+                        const sql = `INSERT INTO employees(first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                            connection.query(sql, newEmployee, (err, rows) => {
+                                if (err) {
+                                    throw err;
+                                }
+                               console.log('New employee has been added');
+                                
+                            }) 
+                    })
+                })
+            })
+        })
+    })
+
+    
 
 
-// function to update an employee role ********
+
+
+    const sql = `SELECT * FROM employees`;
+    connection.query(sql, (err, rows) => {
+        
+    })
+}
+
+
+
+
+
+
+
+
+
+// function to update an employee role 
+// (first_name, last_name, role_id, manager_id)********
+const updateEmployee = () => {
+    const sql = `SELECT * FROM employees`;
+    connection.query(sql, (err, rows) => {
+        const employees = rows.map(({first_name, last_name}));
+
+        inquirer.prompt ([
+            {
+            name: 'employees',
+            type: 'list',
+            message: 'What employee would you like to update?',
+            choices: employees
+            //validate: ''
+            }
+        ])
+        .then((answer) => {
+
+        })
+    })
+}
 
 
 module.exports = prompt;
