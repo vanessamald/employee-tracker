@@ -7,9 +7,10 @@ CREATE TABLE employees (
 );
 
 CREATE TABLE departments (
-    id INT PRIMARY KEY,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(30)
 );
+
 CREATE TABLE roles (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30),

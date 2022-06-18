@@ -40,10 +40,13 @@ function prompt() {
     if ( userPrompt == 'Add a department') {
         addDepartment();
     }
+    if ( userPrompt == 'Add a role') {
+        addRole();
+    }
     })
 };
 
-// function to view all departments
+// function to view all departments  
 const viewAllDepartments = () => {
     console.log('VIEWING DEPARTMENTS')
 
@@ -56,7 +59,7 @@ const viewAllDepartments = () => {
     })  
 };
 
-// function to view all roles
+// function to view all roles 
 const viewAllRoles = () => {
     const roleData = `SELECT * FROM roles`;
     connection.query(roleData, (err, rows) => {
@@ -68,7 +71,7 @@ const viewAllRoles = () => {
     })
 };
 
-// function to view all employees
+// function to view all employees 
 const viewAllEmployees = () => {
     console.log('HELLO');
     
@@ -82,7 +85,7 @@ const viewAllEmployees = () => {
     })  
 };
 
-// function to add a department
+// function to add a department 
 const addDepartment = () => {
     console.log('ADDING DEPARTMENT');
     inquirer.prompt([
@@ -94,23 +97,65 @@ const addDepartment = () => {
         }
     ])
     .then((answer) => {
-        const department = `INSERT INTO departments(department_name) VALUES (${answer.addDepartment})`;
+        const department = `INSERT INTO departments (department_name) VALUES (?)`;
         console.log(answer.addDepartment);
 
-        connection.query(department, answer.addDepartment, (rows) => {
+        connection.query(department, answer.addDepartment, (err, rows) => {
+            const departments = `SELECT * FROM departments`;
+            connection.query(departments, (err, rows) => {
+
+            console.table(rows);
             console.log('New department has been added!');
-            viewAllDepartments();
-        //const viewDept = `SELECT * FROM departments`
-            //console.table(rows);
-
-        })
-        
-    })
-
-    
+            
+            prompt();
+            })
+        })   
+    })    
 };
 
-// function to add a role
+// function to add a role **********
+// title, salary, department
+const addRole = () => {
+    //const departmentsArray = [];
+    inquirer.prompt([
+        
+        {
+        name: 'departmentName',
+        type: 'checkbox',
+        message: 'What department do you want to add the new role to?',
+        choices: ''
+        //validate:
+        },
+        
+        {
+            name: 'addNewRole',
+            type: 'input',
+            message: 'What is the name of the new role?'
+            //validate:
+        },
+        {
+           name: 'newSalary',
+           type: 'input',
+           message: 'What is the salary for the new role?' 
+        }
+    ])
+    .then((answer) => {
+        const departmentName = answer.departmentName;
+        // add the dept id HERE 
+
+        
+        const addNewRole = answer.addNewRole;
+        const roleSalary = answer.newSalary;
+
+        const insertRole = `INSERT INTO roles(title, salary, id) VALUES (?, ?, ?)`;
+        
+        connection.query(insertRole, addNewRole, roleSalary, (rows) => {
+
+        return insertRole;
+        viewAllRoles();
+        })
+    })
+};
 
 
 // function to update an employee role
