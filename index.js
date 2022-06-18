@@ -118,15 +118,6 @@ const addDepartment = () => {
 const addRole = () => {
     //const departmentsArray = [];
     inquirer.prompt([
-        
-        {
-        name: 'departmentName',
-        type: 'checkbox',
-        message: 'What department do you want to add the new role to?',
-        choices: ''
-        //validate:
-        },
-        
         {
             name: 'addNewRole',
             type: 'input',
@@ -140,25 +131,62 @@ const addRole = () => {
         }
     ])
     .then((answer) => {
-        const departmentName = answer.departmentName;
-        // add the dept id HERE 
-
-        
         const addNewRole = answer.addNewRole;
         const roleSalary = answer.newSalary;
 
-        const insertRole = `INSERT INTO roles(title, salary, id) VALUES (?, ?, ?)`;
+        const sql = `SELECT * FROM departments`;
+        connection.query(sql, (err, rows) => {
         
-        connection.query(insertRole, addNewRole, roleSalary, (rows) => {
+        const departments = rows.map(({department_name, id}) => ({name: department_name, value:id}));
+        //const dept = 
+        //const deptId = departments.value;
+        //console.log(departments);
+       
+        inquirer.prompt ([
+        {
+            name: 'departmentName',
+            type: 'list',
+            message: 'What department do you want to add the new role to?',
+            choices: departments
+            //validate:    
+        }   
+    ])
+    
 
-        return insertRole;
-        viewAllRoles();
+
+    .then((answer) => {
+        const { departmentName } = answer;
+        const deptId = departmentName;
+        console.log(departmentName);
+        //const departmentName = answer.departmentName;
+        //const selectingDept = `SELECT department_name FROM departments WHERE (?)`
+        // add the dept id HERE
+        //connection.query(selectingDept, answer.departmentName, (err, rows) => {
+        //console.log(rows); 
+        
+        const roleData = [addNewRole, roleSalary, deptId];
+    
+        const insertRole = `INSERT INTO roles(title, salary, department_id) VALUES (?, ?, ?)`;
+        connection.query(insertRole, roleData, (rows) => {
+            console.log('New role has been added!');
+            console.log(addNewRole, roleSalary, deptId);
+        //return insertRole;
+        //viewAllRoles();
+
+        const newRoles = `SELECT * FROM roles`;
+            connection.query(newRoles, (err, rows) => {
+            console.table(rows);
         })
-    })
+        }
+        )})
+        
+    
+        })   
+    })    
 };
 
 
-// function to update an employee role
+// function to update an employee role ********
 
 
 module.exports = prompt;
