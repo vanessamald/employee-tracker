@@ -182,6 +182,7 @@ const addRole = () => {
         })   
     })    
 };
+
 // function to add an employee 
 // (first_name, last_name, role_id, manager_id)
 const addEmployee = () => {
@@ -213,41 +214,39 @@ const addEmployee = () => {
                     choices: roles
                 }
             ])
-            .then((answer) => {
-                const roleId = answer.role;
+    .then((answer) => {
+        const roleId = answer.role;
+        const sql = `SELECT * FROM employees`;
                
-
-                const sql = `SELECT * FROM employees`;
-               
-                connection.query(sql, (err, rows) => {
-                const managers = rows.map(({first_name, last_name, id}) => ({name: `${first_name} ${last_name}`, value: id}));
+        connection.query(sql, (err, rows) => {
+        const managers = rows.map(({first_name, last_name, id}) => ({name: `${first_name} ${last_name}`, value: id}));
                 
-                    inquirer.prompt([
-                        {
-                            name: 'manager',
-                            type: 'list',
-                            message: "Who is the new employee's manager?",
-                            choices: managers
+            inquirer.prompt([
+                {
+                    name: 'manager',
+                    type: 'list',
+                    message: "Who is the new employee's manager?",
+                    choices: managers
+                }
+                ])
+                .then((answer) => {
+                    const { manager } = answer;
+                    const newEmployee = [firstName, lastName, roleId, manager];
+                    console.log(newEmployee);
+                    const sql = `INSERT INTO employees(first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                    connection.query(sql, newEmployee, (err, rows) => {
+                        if (err) {
+                            throw err;
                         }
-                    ])
-                    .then((answer) => {
-                        const { manager } = answer;
-                        const newEmployee = [firstName, lastName, roleId, manager];
-                        console.log(newEmployee);
-                        const sql = `INSERT INTO employees(first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-                            connection.query(sql, newEmployee, (err, rows) => {
-                                if (err) {
-                                    throw err;
-                                }
-                                console.log('New employee has been added!');
-                                viewAllEmployees();
+                            console.log('New employee has been added!');
+                            viewAllEmployees();
                         }) 
                     })
                 })
             })
         })
     })
-}
+};
 
 // function to update an employee role 
 // (first_name, last_name, role_id, manager_id)********
@@ -295,7 +294,7 @@ const updateEmployee = () => {
             })
         })
     })
-}
+};
 
 // function to remove an employee
 const deleteEmployee = () => {
@@ -326,6 +325,6 @@ const deleteEmployee = () => {
             })
         })
     })
-}
+};
 
 module.exports = prompt;
