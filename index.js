@@ -178,7 +178,7 @@ const addRole = () => {
         })   
     })    
 };
-// function to add an employee ********
+// function to add an employee 
 // (first_name, last_name, role_id, manager_id)
 const addEmployee = () => {
     inquirer.prompt ([
@@ -237,44 +237,30 @@ const addEmployee = () => {
                                 if (err) {
                                     throw err;
                                 }
-                               console.log('New employee has been added');
-                                
+                                console.log('New employee has been added');
+                                viewAllEmployees();
                             }) 
                     })
                 })
             })
         })
     })
-
-    
-
-
-
-
-    const sql = `SELECT * FROM employees`;
-    connection.query(sql, (err, rows) => {
+    //const sql = `SELECT * FROM employees`;
+    //connection.query(sql, (err, rows) => {
         
-    })
+    //})
 }
-
-
-
-
-
-
-
-
 
 // function to update an employee role 
 // (first_name, last_name, role_id, manager_id)********
 const updateEmployee = () => {
     const sql = `SELECT * FROM employees`;
     connection.query(sql, (err, rows) => {
-        const employees = rows.map(({first_name, last_name}));
+        const employees = rows.map(({first_name, last_name}) => ({name: `${first_name}, ${last_name}`}));
 
         inquirer.prompt ([
             {
-            name: 'employees',
+            name: 'employee',
             type: 'list',
             message: 'What employee would you like to update?',
             choices: employees
@@ -282,7 +268,30 @@ const updateEmployee = () => {
             }
         ])
         .then((answer) => {
-
+            const employee = answer.name;
+            const sql = `SELECT title, id FROM roles`;
+            connection.query(sql, (err, rows) => {
+                const roles = rows.map(({title, id}) => ({name: title, value: id}));
+                inquirer.prompt([
+                    {
+                        name: 'role',
+                        type: 'list',
+                        message: 'What is the new role of the employee?',
+                        choices: roles
+                    }
+                ])
+                .then((answer) => {
+                    const newRole = answer.role;
+                    const employeeRole = [newRole, employee];
+                    const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
+                    connection.query(sql, employeeRole, (err, rows) => {
+                        if (err) {
+                            throw err;
+                        }
+                        console.log('Employee has been updated');
+                    })
+                })
+            })
         })
     })
 }
