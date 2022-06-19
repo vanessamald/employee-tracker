@@ -18,8 +18,9 @@ function prompt() {
             "Add a role",
             "Add an employee",
             "Update an employee role",
+            "Update employee's manager",
+            "EXIT",
             "Delete an employee",
-            "EXIT"
         ]
     }
 ])
@@ -53,7 +54,10 @@ function prompt() {
     }
     if ( userPrompt == 'Delete an employee') {
         deleteEmployee();
-    }    
+    }
+    if ( userPrompt == "Update employee's manager") {
+        updateManager();
+    }      
 })};
 
 // function to view all departments  
@@ -103,7 +107,6 @@ const addDepartment = () => {
         name: 'addDepartment',
         type: 'input',
         message: 'What is the name of the new Department?'
-        //validate: 
         }
     ])
     .then((answer) => {
@@ -153,8 +156,7 @@ const addRole = () => {
             name: 'departmentName',
             type: 'list',
             message: 'What department do you want to add the new role to?',
-            choices: departments
-            //validate:    
+            choices: departments    
         }   
     ])
     .then((answer) => {
@@ -177,6 +179,8 @@ const addRole = () => {
             const newRoles = `SELECT * FROM roles`;
             connection.query(newRoles, (err, rows) => {
             console.table(rows);
+            
+            return prompt();
                 })}
             )})
         })   
@@ -261,7 +265,6 @@ const updateEmployee = () => {
             type: 'list',
             message: 'What employee would you like to update?',
             choices: employees
-            //validate: ''
             }
         ])
         .then((answer) => {
@@ -317,14 +320,65 @@ const deleteEmployee = () => {
             const { employee } = answer;
             console.log(employee);
             const sql = `DELETE FROM employees WHERE id = ?`;
-            connection.query(sql, employee, (err, rows) => {
-                //if (err);
-                //throw error;
+            connection.query(sql, employee, (rows) => {
                 console.log('Employee has been deleted!');
                 viewAllEmployees();
             })
         })
     })
 };
+
+// function to update employee's manager
+const updateManager = () => {
+    const sql = `SELECT * FROM employees`;
+
+    connection.query(sql, (err, rows) => {
+        const employees = rows.map(({first_name, last_name, id}) => ({name: `${first_name}, ${last_name}`, value: id}));
+        inquirer.prompt([
+            {
+                name: 'employee',
+                type: 'checkbox',
+                message: "What employee's manager would you like to update?",
+                choices: employees
+            }
+        ])
+        .then((answer) => {
+            const { employee } = answer;
+            const sql = `SELECT first_name, last_name, id FROM employees WHERE role_id = 1`;
+            
+            connection.query(sql, (err, rows) => {
+                const managers = rows.map(({first_name, last_name, id}) => ({name: `${first_name}, ${last_name}`, value: id}));
+                inquirer.prompt([
+                    {
+                        name: 'manager',
+                        type: 'checkbox',
+                        message: 'Who is the new manager for the employee?',
+                        choices: managers
+                    }
+                ])
+                .then((answer) => {
+                    const { manager } = answer;
+                    //console.log(manager);
+                    //console.log(employee);
+                    const newManager = [manager, employee];
+
+                    const sql = `UPDATE employees SET manager_id = ? WHERE id = ?`;
+
+                    connection.query(sql, newManager, (err, rows) => {
+                        console.log("The employee's manager has been updated!");
+                        viewAllEmployees();
+                    })
+                })
+
+            })
+
+            //connection.query(sql, (rows) => {
+
+            //})
+            
+
+        })
+    })
+}
 
 module.exports = prompt;
