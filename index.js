@@ -135,14 +135,12 @@ const addDepartment = () => {
 };
 
 // function to add a role (title, salary, department)
-const addRole = () => {
-    
+const addRole = () => {    
     inquirer.prompt([
         {
             name: 'addNewRole',
             type: 'input',
             message: 'What is the name of the new role?'
-            //validate:
         },
         {
            name: 'newSalary',
@@ -181,7 +179,6 @@ const addRole = () => {
         connection.query(insertRole, roleData, (rows) => {
             // let user know new role has been added 
             console.log('New role has been added!');
-            //console.log(addNewRole, roleSalary, deptId);
             
             // print new roles table
             const newRoles = `SELECT * FROM roles`;
@@ -196,7 +193,6 @@ const addRole = () => {
 };
 
 // function to add an employee 
-// (first_name, last_name, role_id, manager_id)
 const addEmployee = () => {
     inquirer.prompt ([
         {
@@ -261,7 +257,7 @@ const addEmployee = () => {
 };
 
 // function to update an employee role 
-// (first_name, last_name, role_id, manager_id)********
+
 const updateEmployee = () => {
     const sql = `SELECT * FROM employees`;
     connection.query(sql, (err, rows) => {
@@ -366,8 +362,6 @@ const updateManager = () => {
                 ])
                 .then((answer) => {
                     const { manager } = answer;
-                    //console.log(manager);
-                    //console.log(employee);
                     const newManager = [manager, employee];
 
                     const sql = `UPDATE employees SET manager_id = ? WHERE id = ?`;
@@ -401,7 +395,6 @@ inquirer.prompt([
 ])
 .then((answer) => {
     const { department } = answer;
-    //console.log(department);
     const sql = `DELETE FROM departments WHERE id = ?`;
         connection.query(sql, department, (err, rows) => {
             if (err) {
@@ -444,7 +437,5 @@ const deleteRole = () => {
             })
         }) 
     }
-
-
 
 module.exports = prompt;

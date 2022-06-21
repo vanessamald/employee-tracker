@@ -15,6 +15,7 @@ app.use(express.json());
 connection.connect(err => {
     if(err) throw err;
     console.log('Connected to the database');
+    
 // connect to server 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
