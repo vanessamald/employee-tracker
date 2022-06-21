@@ -21,6 +21,8 @@ function prompt() {
             "Update employee's manager",
             "EXIT",
             "Delete an employee",
+            "Delete a department",
+            "Delete a role"
         ]
     }
 ])
@@ -57,7 +59,13 @@ function prompt() {
     }
     if ( userPrompt == "Update employee's manager") {
         updateManager();
-    }      
+    }
+    if ( userPrompt == "Delete a department") {
+        deleteDept();
+    }  
+    if ( userPrompt == "Delete a role") {
+    deleteRole();
+}       
 })};
 
 // function to view all departments  
@@ -344,7 +352,7 @@ const updateManager = () => {
         ])
         .then((answer) => {
             const { employee } = answer;
-            const sql = `SELECT first_name, last_name, id FROM employees WHERE role_id = 1`;
+            const sql = `SELECT first_name, last_name, id FROM employees`;
             
             connection.query(sql, (err, rows) => {
                 const managers = rows.map(({first_name, last_name, id}) => ({name: `${first_name}, ${last_name}`, value: id}));
@@ -369,16 +377,74 @@ const updateManager = () => {
                         viewAllEmployees();
                     })
                 })
-
             })
-
-            //connection.query(sql, (rows) => {
-
-            //})
-            
-
         })
     })
 }
+
+// function to delete department
+const deleteDept = () => {
+const sql = `SELECT * FROM departments`;
+connection.query(sql, (err, rows) => {
+    if (err) {
+        throw err;
+    }
+
+const dept = rows.map(({department_name, id}) => ({name: department_name, value: id}));
+inquirer.prompt([
+    {
+        type: 'checkbox',
+        name: 'department',
+        message: 'Which department would you like to delete?',
+        choices: dept 
+    }
+])
+.then((answer) => {
+    const { department } = answer;
+    //console.log(department);
+    const sql = `DELETE FROM departments WHERE id = ?`;
+        connection.query(sql, department, (err, rows) => {
+            if (err) {
+                throw err;
+            }
+            console.log('Department has been deleted!');
+            viewAllDepartments();
+            })
+        })
+    }) 
+}
+// function to delete a role
+const deleteRole = () => {
+    const sql = `SELECT * FROM roles`;
+    connection.query(sql, (err, rows) => {
+        if (err) {
+            throw err;
+        }
+    
+    const roles = rows.map(({title, id}) => ({name: title, value: id}));
+    inquirer.prompt([
+        {
+            type: 'checkbox',
+            name: 'deleteRole',
+            message: 'Which role would you like to delete?',
+            choices: roles 
+        }
+    ])
+    .then((answer) => {
+        const { deleteRole } = answer;
+        console.log(deleteRole);
+        const sql = `DELETE FROM roles WHERE id = ?`;
+            connection.query(sql, deleteRole, (err, rows) => {
+                if (err) {
+                    throw err;
+                }
+                console.log('The role has been deleted!');
+                viewAllRoles();
+                })
+            })
+        }) 
+    }
+
+
 
 module.exports = prompt;
